@@ -17,7 +17,7 @@ struct MyLogMessage: Encodable {
 
 let message = MyLogMessage(foo: "My string", bar: 42, baz: URL(string: "http://example.com/")!)
 try TextEncoder().encoder(message)
-# => foo="My string" bar=42 baz="http://example.com/"
+// => foo="My string" bar=42 baz="http://example.com/"
 ```
 
 ## Limitations
