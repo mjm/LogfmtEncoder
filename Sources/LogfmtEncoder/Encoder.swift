@@ -67,7 +67,7 @@ extension _LogfmtEncoder {
     func stringify(_ value: UInt32) -> String { return String(describing: value) }
     func stringify(_ value: UInt64) -> String { return String(describing: value) }
     
-    func stringify<T: Encodable>(_ value: T) throws -> String? {
+    func stringify<T: Encodable>(_ value: T, codingPath: [CodingKey]) throws -> String? {
         if T.self == Date.self || T.self == NSDate.self {
             return dateFormatter.string(from: value as! Date)
         }
@@ -75,6 +75,10 @@ extension _LogfmtEncoder {
         if T.self == URL.self || T.self == NSURL.self {
             return (value as! URL).absoluteString
         }
+        
+        var oldCodingPath = self.codingPath
+        self.codingPath = codingPath
+        defer { self.codingPath = oldCodingPath }
         
         try value.encode(to: self)
         return nil

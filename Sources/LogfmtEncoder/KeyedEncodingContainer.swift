@@ -11,88 +11,73 @@ struct LogfmtKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtoco
     }
     
     mutating func encode(_ value: Bool, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: String, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Double, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Float, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Int, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Int8, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Int16, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Int32, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: Int64, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: UInt, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: UInt8, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: UInt16, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: UInt32, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode(_ value: UInt64, forKey key: K) throws {
-        try assertCanEncodeValue(key: key)
-        storage.append(key.stringValue, encoder.stringify(value))
+        storage.append(makeKey(key), encoder.stringify(value))
     }
     
     mutating func encode<T>(_ value: T, forKey key: K) throws where T : Encodable {
-        try assertCanEncodeValue(key: key)
-        
-        encoder.codingPath.append(key)
-        defer { encoder.codingPath.removeLast() }
-        
-        if let str = try encoder.stringify(value) {
-            storage.append(key.stringValue, str)
+        if let str = try encoder.stringify(value, codingPath: codingPath + [key]) {
+            storage.append(makeKey(key), str)
         }
     }
     
     mutating func nestedContainer<NestedKey>(keyedBy keyType: NestedKey.Type, forKey key: K) -> KeyedEncodingContainer<NestedKey> where NestedKey : CodingKey {
-        fatalError("LogfmtEncoder does not currently support nesting")
+        codingPath.append(key)
+        defer { codingPath.removeLast() }
+        
+        let container = LogfmtKeyedEncodingContainer<NestedKey>(encoder: encoder, storage: storage, codingPath: codingPath)
+        return KeyedEncodingContainer(container)
     }
     
     mutating func nestedUnkeyedContainer(forKey key: K) -> UnkeyedEncodingContainer {
@@ -107,9 +92,7 @@ struct LogfmtKeyedEncodingContainer<K: CodingKey>: KeyedEncodingContainerProtoco
         return encoder
     }
     
-    private func assertCanEncodeValue(key: K) throws {
-        if codingPath.count > 0 {
-            throw TextEncodingError.nestingNotSupported(codingPath + [key])
-        }
+    private func makeKey(_ key: K) -> String {
+        (codingPath + [key]).map { $0.stringValue }.joined(separator: ".")
     }
 }
