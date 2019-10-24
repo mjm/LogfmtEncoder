@@ -23,4 +23,4 @@ try TextEncoder().encoder(message)
 ## Limitations
 
 * Unkeyed containers are not supported, since they don't map well to key identifiers for the log format. If you try to encode a value that asks for an unkeyed container, a `fatalError()` will be triggered.
-* Exactly one level of keyed containers is supported. logfmt messages are a flat list of keys, and your `Encodable`s must match that. It is valid to encode something with a single value container as long as it's already within a keyed container.
+* A top-level single value is not supported. logfmt messages must have keys.
